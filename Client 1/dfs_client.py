@@ -22,7 +22,7 @@ def name_node(sock, proc):
     for server, files in data.items():
         print(f"{server}:")
         for file, (content, file_size) in files.items():
-            print(f"    {file} - size: {file_size}")
+            print(f"    {file} - size: {file_size} bytes")
 
 def receive_file(sock, file_path, proc):
     file_name = proc + file_path
