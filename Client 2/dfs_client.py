@@ -3,6 +3,17 @@ import sys
 import os
 import pickle
 
+def get_meta(sock, file_path, proc):
+    file_name = proc + file_path
+    sock.send(file_name.encode())
+    sock.recv(1024)
+    data = sock.recv(1024)
+    data = pickle.loads(data)
+    print("File name:", data[0])
+    print("File size:", data[1], "bytes")
+    print("Last modified time:", data[2])
+    print("Last access time:", data[3])
+
 def name_node(sock, proc):
     sock.send(proc.encode())
     sock.recv(1024)
@@ -52,13 +63,11 @@ def upload_file(sock, file_path, proc):
     print(f"File {file_path} uploaded successfully")
 
 def main():
-    if len(sys.argv) == 4 and (sys.argv[3] == "-r" or sys.argv[3] == "-a"):
-        server_index = int(sys.argv[1])
-        file_path = sys.argv[2]
-        proc = sys.argv[3]
-
-        server_ip = "localhost" 
-        server_port = 12345 + server_index  
+    server_ip = "localhost" 
+    server_port = 12345
+    if sys.argv[-1] == "-r" or sys.argv[-1] == "-a" or sys.argv[-1] == "-m":
+        file_path = sys.argv[1]
+        proc = sys.argv[-1]
 
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((server_ip, server_port))
@@ -68,12 +77,11 @@ def main():
 
         if proc == "-a":
             upload_file(client_socket, file_path, proc)
+        if proc == "-m":
+            get_meta(client_socket, file_path, proc)
 
     elif len(sys.argv) == 2 and sys.argv[1] == "list":
         proc = sys.argv[1]
-
-        server_ip = "localhost" 
-        server_port = 12345
 
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((server_ip, server_port))
